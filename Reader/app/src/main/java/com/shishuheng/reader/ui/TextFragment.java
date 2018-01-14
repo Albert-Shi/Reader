@@ -2,7 +2,8 @@ package com.shishuheng.reader.ui;
 
 import android.app.Activity;
 import android.os.Bundle;
-import android.app.Fragment;
+import android.support.v4.app.Fragment;
+import android.support.v7.widget.CardView;
 import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
 import android.view.GestureDetector;
@@ -52,7 +53,7 @@ public class TextFragment extends Fragment {
     long needToadd = 0;
 
     //获取页面设置参数
-    LinearLayout ll;
+    CardView card;
     float textSize;
     float lineHeight;
     float letterSpacing;
@@ -112,16 +113,16 @@ public class TextFragment extends Fragment {
         mainDisplay =  view.findViewById(R.id.text_container);
 
         //获取页面设置参数
-        ll = (LinearLayout)view.findViewById(R.id.ceshi);
+        card = (CardView) view.findViewById(R.id.card);
         textSize = mainDisplay.getPaint().getTextSize();
         lineHeight = mainDisplay.getLineHeight();
         letterSpacing = mainDisplay.getLetterSpacing();
-        paddingTop = ll.getPaddingTop();
-        paddingBottom = ll.getPaddingBottom();
-        paddingLeft = ll.getPaddingLeft();
-        paddingRight = ll.getPaddingRight();
+        paddingTop = card.getPaddingTop();
+        paddingBottom = card.getPaddingBottom();
+        paddingLeft = card.getPaddingLeft();
+        paddingRight = card.getPaddingRight();
 
-        screenSize = Utilities.getScreenSize(getActivity(), textSize, lineHeight, paddingTop, letterSpacing);
+        screenSize = Utilities.getScreenSize(getActivity(), textSize, lineHeight, 40, letterSpacing);
 
         txt = ((FullscreenActivity)rootActivity).getTxtDetail();
         lineCharacterNumber = screenSize.getLineCharacterNumber();

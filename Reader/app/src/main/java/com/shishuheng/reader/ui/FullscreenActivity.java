@@ -1,10 +1,10 @@
 package com.shishuheng.reader.ui;
 
 import android.annotation.SuppressLint;
-import android.app.Fragment;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.support.v4.app.Fragment;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -238,7 +238,7 @@ public class FullscreenActivity extends AppCompatActivity {
     }
 
     public void startFragment(Fragment fragment) {
-        getFragmentManager().beginTransaction().add(R.id.fullscreen_content, fragment).commit();
+        getSupportFragmentManager().beginTransaction().add(R.id.fullscreen_content, fragment).commit();
     }
 
     public void setTextContent() {
