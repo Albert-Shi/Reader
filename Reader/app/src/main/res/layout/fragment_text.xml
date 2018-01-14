@@ -1,0 +1,37 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#ffffff"
+    tools:context="com.shishuheng.reader.ui.TextFragment"
+    android:id="@+id/container_fragment">
+
+    <!-- TODO: Update blank fragment layout -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/ceshi"
+        android:padding="10dp"
+        android:background="@drawable/round_rectangle_background">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:textSize="16dp"
+        android:textColor="#f13d1a00"
+        android:id="@+id/text_container"
+        android:text="看到这个表明APP出错啦"
+        android:elevation="5dp"
+        android:scrollbars="vertical"
+        android:scrollbarStyle="outsideInset"
+        android:layout_gravity="center"
+        android:textIsSelectable="true"/>
+    </LinearLayout>
+<!--
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="150dp"
+        android:layout_height="200dp"
+        android:layout_gravity="center"></LinearLayout>
+-->
+</FrameLayout>
