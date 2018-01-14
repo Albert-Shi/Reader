@@ -12,11 +12,14 @@ import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
 import android.os.Environment;
 import android.support.v4.app.ActivityCompat;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.DisplayMetrics;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
+import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.LinearLayout;
@@ -33,6 +36,7 @@ import com.shishuheng.reader.ui.DisplayAdapter;
 import com.shishuheng.reader.ui.FullscreenActivity;
 import com.shishuheng.reader.ui.ItemMenuAdapter;
 import com.shishuheng.reader.ui.MainActivity;
+import com.shishuheng.reader.ui.RecyclerViewAdapter;
 import com.shishuheng.reader.ui.TextFragment;
 
 import java.io.File;
@@ -94,6 +98,13 @@ public class Utilities {
         }
         database.close();
 
+        RecyclerViewAdapter adapter = new RecyclerViewAdapter(activity, txts);
+        RecyclerView recyclerView = (RecyclerView) view.findViewById(R.id.display_listView);
+        recyclerView.setLayoutAnimation(AnimationUtils.loadLayoutAnimation(activity, R.anim.layout_animation_from_bottom));
+        recyclerView.setLayoutManager(new LinearLayoutManager(activity, LinearLayoutManager.VERTICAL, false));
+        recyclerView.setAdapter(adapter);
+
+        /*
         DisplayAdapter adapter = new DisplayAdapter(activity, txts);
         ListView display = (ListView) view.findViewById(R.id.display_listView);
         display.setAdapter(adapter);
@@ -127,6 +138,7 @@ public class Utilities {
                 activity.startActivity(intent);
             }
         });
+        */
     }
 
     public static void reloadMenuItem(Context context, View view) {
