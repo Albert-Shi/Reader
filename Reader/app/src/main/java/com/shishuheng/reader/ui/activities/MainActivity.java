@@ -1,11 +1,10 @@
-package com.shishuheng.reader.ui;
+package com.shishuheng.reader.ui.activities;
 
 import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.AppOpsManager;
-import android.app.Fragment;
-import android.app.FragmentManager;
+import android.graphics.Color;
+import android.support.v4.app.Fragment;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
@@ -14,6 +13,7 @@ import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
 import android.view.View;
 import android.support.design.widget.NavigationView;
@@ -24,24 +24,37 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.WindowManager;
 
 import com.shishuheng.reader.R;
 import com.shishuheng.reader.datastructure.TxtDetail;
-import com.shishuheng.reader.process.Utilities;
+import com.shishuheng.reader.ui.fragment.HomeFragment;
+
+import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
     public TxtDetail currentTxt = null;
+    public ArrayList<TxtDetail> allTxts = null;
     public Fragment currentFragment = null;
     private HomeFragment homeFragment = null;
-    public int TextSize = 1024;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        //全屏显示Activity（不显示状态栏）
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
+        getWindow().setStatusBarColor(Color.argb(0,0,0,0));
+
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
+//        setSupportActionBar(toolbar);
+
+        //toolBar设置背景图片
+        toolbar.setBackground(getDrawable(R.drawable.toolbar_bg));
+
+        toolbar.setTitle("主页");
+        toolbar.setSubtitle("书籍列表");
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -54,7 +67,7 @@ public class MainActivity extends AppCompatActivity
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+                this, drawer, null, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.addDrawerListener(toggle);
         toggle.syncState();
 
@@ -103,9 +116,9 @@ public class MainActivity extends AppCompatActivity
             */
         }
         Context mc = this;
-        FragmentManager fm = getFragmentManager();
+        FragmentManager fm = getSupportFragmentManager();
         homeFragment = new HomeFragment();
-        fm.beginTransaction().add(R.id.content_main, homeFragment).commit();
+        fm.beginTransaction().replace(R.id.content_main, homeFragment).commit();
     }
 
     @Override
@@ -114,7 +127,7 @@ public class MainActivity extends AppCompatActivity
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else if (currentFragment != homeFragment && currentFragment != null) {
-            getFragmentManager().beginTransaction().replace(R.id.content_main, homeFragment).commit();
+            getSupportFragmentManager().beginTransaction().replace(R.id.content_main, homeFragment).commit();
             currentFragment = homeFragment;
         } else {
             super.onBackPressed();

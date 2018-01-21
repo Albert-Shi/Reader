@@ -1,5 +1,8 @@
 package com.shishuheng.reader.datastructure;
 
+import com.shishuheng.reader.process.Book;
+
+import java.io.File;
 import java.io.Serializable;
 
 /**
@@ -11,10 +14,21 @@ public class TxtDetail implements Serializable{
     private String path;
     private long hasReadPointer = 0;
     private String firstLineLastExit = "";
+    private int codingFormat = 1;
+    private long totality = 0;
+
+    public int getCodingFormat() {
+        return codingFormat;
+    }
+
+    public void setCodingFormat(int codingFormat) {
+        this.codingFormat = codingFormat;
+    }
 
     public void setName(String name) {
         this.name = name;
     }
+
     public String getName() {
         return name;
     }
@@ -22,6 +36,7 @@ public class TxtDetail implements Serializable{
     public void setPath(String path) {
         this.path = path;
     }
+
     public String getPath() {
         return path;
     }
@@ -40,5 +55,21 @@ public class TxtDetail implements Serializable{
 
     public void setFirstLineLastExit(String firstLineLastExit) {
         this.firstLineLastExit = firstLineLastExit;
+    }
+
+    public void setTotality(long totality) {
+        this.totality = totality;
+    }
+
+    public long getTotality() {
+        return totality;
+    }
+
+    public void sychronizationToBook (Book book) {
+        book.setReadPointer(hasReadPointer);
+        book.setCodingFormat(codingFormat);
+        book.setName(name);
+        book.setTotality(totality);
+        book.setFilePath(new File(path));
     }
 }

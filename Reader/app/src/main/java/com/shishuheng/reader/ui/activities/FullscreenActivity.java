@@ -1,10 +1,12 @@
-package com.shishuheng.reader.ui;
+package com.shishuheng.reader.ui.activities;
 
 import android.annotation.SuppressLint;
-import android.app.Fragment;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.graphics.BitmapFactory;
+import android.graphics.Color;
+import android.support.v4.app.Fragment;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -12,17 +14,20 @@ import android.os.Handler;
 import android.text.method.ScrollingMovementMethod;
 import android.transition.Transition;
 import android.transition.TransitionInflater;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.Window;
-import android.widget.TextView;
+import android.view.WindowManager;
+import android.widget.FrameLayout;
+import android.widget.LinearLayout;
 
 import com.shishuheng.reader.R;
 import com.shishuheng.reader.datastructure.ActivitySerializable;
 import com.shishuheng.reader.datastructure.TxtDetail;
 import com.shishuheng.reader.process.BookInformationDatabaseOpenHelper;
 import com.shishuheng.reader.process.Utilities;
+import com.shishuheng.reader.ui.coustomize.ReadView;
+import com.shishuheng.reader.ui.fragment.TextFragment;
 
 /**
  * An example full-screen activity that shows and hides the system UI (i.e.
@@ -114,6 +119,13 @@ public class FullscreenActivity extends AppCompatActivity {
         getWindow().requestFeature(Window.FEATURE_ACTIVITY_TRANSITIONS);
         Transition animation = TransitionInflater.from(getApplicationContext()).inflateTransition(R.transition.slide);
         getWindow().setEnterTransition(animation);
+        //全屏显示Activity（不显示状态栏）
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
+        getWindow().setStatusBarColor(Color.argb(0,0,0,0));
+
+        //屏幕常亮 参考 http://blog.csdn.net/a57565587/article/details/51669520
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+
         setContentView(R.layout.activity_fullscreen);
 
         mVisible = true;
@@ -121,7 +133,7 @@ public class FullscreenActivity extends AppCompatActivity {
         mContentView = findViewById(R.id.fullscreen_content);
 
         currentTxt = (TxtDetail) getIntent().getSerializableExtra("currentTextDetail");
-        screenTextSize = getIntent().getIntExtra("TextSize", 512);
+//        screenTextSize = getIntent().getIntExtra("TextSize", 512);
 
 
 
@@ -142,19 +154,33 @@ public class FullscreenActivity extends AppCompatActivity {
 //        findViewById(R.id.dummy_button).setOnTouchListener(mDelayHideTouchListener);
         BookInformationDatabaseOpenHelper helper = new BookInformationDatabaseOpenHelper(this, Utilities.DATABASE_NAME, null, Utilities.DATABASE_VERSION);
         SQLiteDatabase db = helper.getWritableDatabase();
-        String q = "select readPointer from Books where path=?";
-        Cursor cursor = db.rawQuery(q, new String[]{currentTxt.getPath()});
+        String q1 = "select readPointer from Books where path=?";
+        String q2 = "select codingFormat from Books where path=?";
+        String q3 = "select totality from Books where path=?";
+        Cursor cursor = db.rawQuery(q1, new String[]{currentTxt.getPath()});
         int position;
         if (cursor.moveToFirst()) {
             position = cursor.getInt(cursor.getColumnIndex("readPointer"));
             currentTxt.setHasReadPointer(position);
         }
+        cursor = db.rawQuery(q2, new String[]{currentTxt.getPath()});
+        if (cursor.moveToFirst()) {
+            position = cursor.getInt(cursor.getColumnIndex("codingFormat"));
+            currentTxt.setCodingFormat(position);
+        }
+        cursor = db.rawQuery(q3, new String[]{currentTxt.getPath()});
+        if (cursor.moveToFirst()) {
+            position = cursor.getInt(cursor.getColumnIndex("totality"));
+            currentTxt.setTotality(position);
+        }
+
         db.close();
 
         setTextContent();
 
         ActionBar actionBar = getSupportActionBar();
         actionBar.setTitle(currentTxt.getName());
+        actionBar.setBackgroundDrawable(getDrawable(R.drawable.toolbar_bg_fullscreen));
     }
 
     @Override
@@ -170,10 +196,10 @@ public class FullscreenActivity extends AppCompatActivity {
     public void toggle() {
         if (mVisible) {
             hide();
-            fragment.getMainDisplay().setMovementMethod(null);
+  //          fragment.getMainDisplay().setMovementMethod(null);
         } else {
             show();
-            fragment.getMainDisplay().setMovementMethod(ScrollingMovementMethod.getInstance());
+//            fragment.getMainDisplay().setMovementMethod(ScrollingMovementMethod.getInstance());
             mControlsView.bringToFront();
         }
     }
@@ -238,7 +264,7 @@ public class FullscreenActivity extends AppCompatActivity {
     }
 
     public void startFragment(Fragment fragment) {
-        getFragmentManager().beginTransaction().add(R.id.fullscreen_content, fragment).commit();
+        getSupportFragmentManager().beginTransaction().add(R.id.fullscreen_content, fragment).commit();
     }
 
     public void setTextContent() {
@@ -279,6 +305,7 @@ public class FullscreenActivity extends AppCompatActivity {
             String q = "select readPointer from Books where path=?";
             ContentValues values = new ContentValues();
             values.put("readPointer", currentTxt.getHasReadPointer());
+            values.put("codingFormat", currentTxt.getCodingFormat());
 //            values.put("firstLineLastExit", currentTxt.getFirstLineLastExit());
 //            String de = "drop table Books";
 //            String rq = "Update Books Set readPointer="+pointer+" Where path="+"'"+currentTxt.getPath()+"'";

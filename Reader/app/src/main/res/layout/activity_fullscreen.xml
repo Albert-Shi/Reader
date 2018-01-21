@@ -3,7 +3,7 @@
     android:id="@+id/fullscreen_content"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.shishuheng.reader.ui.FullscreenActivity">
+    tools:context="com.shishuheng.reader.ui.activities.FullscreenActivity">
 
     <!-- The primary full-screen view. This can be replaced with whatever view
          is needed to present your content, e.g. VideoView, SurfaceView,
@@ -18,36 +18,111 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|center_horizontal"
         android:background="@color/black_overlay"
-        android:orientation="horizontal"
+        android:orientation="vertical"
         tools:ignore="UselessParent">
 
+        <!--
         <Button
-            android:id="@+id/lastPage_button"
+            android:id="@+id/changeCodingFormat_UTF8"
             style="?metaButtonBarButtonStyle"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="上一页" />
+            android:text="UTF-8" />
 
         <View
             android:layout_width="30dp"
             android:layout_height="match_parent" />
+        -->
 
-        <Button
-            android:id="@+id/nextPage_button"
-            style="?metaButtonBarButtonStyle"
-            android:layout_width="0dp"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="下一页" />
+            android:orientation="horizontal">
+        <TextView
+            android:id="@+id/changeCodingFormat"
+            style="?metaButtonBarButtonStyle"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:text="切换编码" />
+            <RadioGroup
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="horizontal"
+                android:gravity="center"
+                android:id="@+id/encode_RadioGroup">
+                <RadioButton
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="GBK"
+                    android:textSize="10dp"
+                    android:textColor="@color/colorAccent"
+                    android:id="@+id/encodeFormat_GBK"/>
+                <RadioButton
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="GBK2312"
+                    android:textSize="10dp"
+                    android:textColor="@color/colorAccent"
+                    android:id="@+id/encodeFormat_GB2312"/>
+                <RadioButton
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="GB18030"
+                    android:textSize="10dp"
+                    android:textColor="@color/colorAccent"
+                    android:id="@+id/encodeFormat_GB18030"/>
+                <RadioButton
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="UTF-8"
+                    android:textSize="10dp"
+                    android:textColor="@color/colorAccent"
+                    android:id="@+id/encodeFormat_UTF8"/>
+            </RadioGroup>
+        </LinearLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="2dp" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingLeft="10dp"
+                android:textSize="10dp"
+                android:textColor="@color/colorAccent"
+                android:text="进度"/>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="right">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingRight="10dp"
+                    android:text="0.00%"
+                    android:textColor="@color/colorAccent"
+                    android:textSize="10dp"
+                    android:id="@+id/seekBarPercentage"/>
+            </LinearLayout>
+        </LinearLayout>
+        <SeekBar
+            android:id="@+id/seekBar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingLeft="@dimen/activity_horizontal_margin"
+            android:paddingRight="@dimen/activity_horizontal_margin" />
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="10dp" />
+
 
     </LinearLayout>
-
-    <FrameLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:fitsSystemWindows="true">
-
-    </FrameLayout>
 
 </FrameLayout>

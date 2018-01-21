@@ -9,8 +9,6 @@ public class ScreenSize {
     private int heightDp;
     private int width;
     private int height;
-    private int lineCharacterNumber;
-    private int lineTotalNumber;
 
     public void setHeightDp(int heightDp) {
         this.heightDp = heightDp;
@@ -42,21 +40,5 @@ public class ScreenSize {
 
     public int getWidth() {
         return width;
-    }
-
-    public int getLineCharacterNumber() {
-        return lineCharacterNumber;
-    }
-
-    public int getLineTotalNumber() {
-        return lineTotalNumber;
-    }
-
-    public void setLineCharacterNumber(int lineCharacterNumber) {
-        this.lineCharacterNumber = lineCharacterNumber;
-    }
-
-    public void setLineTotalNumber(int lineTotalNumber) {
-        this.lineTotalNumber = lineTotalNumber;
     }
 }

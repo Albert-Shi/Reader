@@ -17,7 +17,8 @@ public class BookInformationDatabaseOpenHelper extends SQLiteOpenHelper {
             + "image text,"
             + "id integer,"
             + "readPointer integer,"
-            +"firstLineLastExit text)";
+            + "codingFormat integer,"
+            + "totality integer)";
     private Context mContext;
     public BookInformationDatabaseOpenHelper(Context context, String name, SQLiteDatabase.CursorFactory factory, int version) {
         super(context, name, factory, version);

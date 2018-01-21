@@ -1,4 +1,4 @@
-package com.shishuheng.reader.ui;
+package com.shishuheng.reader.adapter;
 
 import android.content.Context;
 import android.view.LayoutInflater;

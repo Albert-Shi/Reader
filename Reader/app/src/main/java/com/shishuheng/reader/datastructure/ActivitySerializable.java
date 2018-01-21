@@ -1,6 +1,6 @@
 package com.shishuheng.reader.datastructure;
 
-import com.shishuheng.reader.ui.MainActivity;
+import com.shishuheng.reader.ui.activities.MainActivity;
 
 import java.io.Serializable;
 
