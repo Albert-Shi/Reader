@@ -6,6 +6,7 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
+import android.graphics.Typeface;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
@@ -44,22 +45,33 @@ public class ReadView extends View {
     private ArrayList<String> textLines = null;
     //默认的canvas
     private Canvas mCanvas = null;
+    //电量，书籍名称，进度
+    private String mBattery = "电量";
+    private String mBookName = "书名";
+    private String mProgress = "进度";
+    //绘制底部信息专用的Paint
+    private Paint mBottomPaint;
+    //字体
+    Typeface typeface = null;
 
     public ReadView(Context context) {
         super(context);
         mPaint = new Paint();
+        mBottomPaint = new Paint();
         setPaint();
     }
 
     public ReadView(Context context, AttributeSet attrs) {
         super(context, attrs);
         mPaint = new Paint();
+        mBottomPaint = new Paint();
         setPaint();
     }
 
     public ReadView(Context context, AttributeSet attrs, int defStyleAttrs) {
         super(context, attrs, defStyleAttrs);
         mPaint = new Paint();
+        mBottomPaint = new Paint();
         setPaint();
     }
 
@@ -86,7 +98,7 @@ public class ReadView extends View {
 //        int availableHeight = mContentHeight-mPaddingTop-mPaddingBottom;
 //            canvas.drawColor(Color.rgb(240, 235, 213));
             int availableWidth = mContentWidth-mPaddingLeft-mPaddingRight;
-            int Y = 60;
+            int Y = 20+getTextSize();
             if (textLines != null && textLines.size() != 0 && mPaint != null && mContentHeight > 0 && mContentWidth > 0) {
                 for (int i = 0; i < textLines.size()-1; i++) {
                     mPaint.setTextScaleX(mScaleX);
@@ -104,6 +116,13 @@ public class ReadView extends View {
                     canvas.drawText(line, getPaddingLeft(), Y, mPaint);
                     Y += (mTextSize+mLineSpacing);
                 }
+
+                //绘制底部基本信息
+                canvas.drawText("当前电量："+mBattery, 20, mContentHeight+20, mBottomPaint);
+                int center_x = (int) (mContentWidth-mBottomPaint.measureText(mBookName))/2;
+                int right_x =  (int) (mContentWidth-mBottomPaint.measureText(mProgress+"00.00")-20);
+                canvas.drawText(mBookName, center_x, mContentHeight+20, mBottomPaint);
+                canvas.drawText("当前进度："+mProgress, right_x, mContentHeight+20, mBottomPaint);
             } else {
                 canvas.drawText("请检查是否设置了控件的宽与高", 0, 50, mPaint);
             }
@@ -150,14 +169,18 @@ public class ReadView extends View {
     */
 
     void setPaint() {
+        //基本的Paint
         mPaint.setTextScaleX(mScaleX);
         mPaint.setTextSize(mTextSize);
         mPaint.setColor(mTextColor);
         mPaint.setLetterSpacing(mLetterSpacing);
         mPaint.setAntiAlias(true);
-        if (this.mCanvas != null) {
-            draw(mCanvas);
-        }
+
+        //绘制底部信息的Paint
+        mBottomPaint.setColor(mTextColor);
+        mBottomPaint.setAntiAlias(true);
+        mBottomPaint.setTextSize(20);
+        invalidate();
     }
 
     void clearCanvas(Canvas canvas) {
@@ -169,6 +192,7 @@ public class ReadView extends View {
 
     public void setTextColor(int textColor) {
         this.mTextColor = textColor;
+        setPaint();
     }
 
     public int getTextColor() {
@@ -177,6 +201,7 @@ public class ReadView extends View {
 
     public void setTextSize(int textSize) {
         this.mTextSize = textSize;
+        setPaint();
     }
 
     public int getTextSize() {
@@ -185,6 +210,7 @@ public class ReadView extends View {
 
     public void setmScaleX(float scaleX) {
         this.mScaleX = scaleX;
+        setPaint();
     }
 
     public float getmScaleX() {
@@ -193,6 +219,7 @@ public class ReadView extends View {
 
     public void setmPaddingTop(int paddingTop) {
         this.mPaddingTop = paddingTop;
+        setPaint();
     }
 
     public int getmPaddingTop() {
@@ -201,6 +228,7 @@ public class ReadView extends View {
 
     public void setmPaddingBottom(int paddingBottom) {
         this.mPaddingBottom = paddingBottom;
+        setPaint();
     }
 
     public int getmPaddingBottom() {
@@ -209,6 +237,7 @@ public class ReadView extends View {
 
     public void setmPaddingLeft(int paddingLeft) {
         this.mPaddingLeft = paddingLeft;
+        setPaint();
     }
 
     public int getmPaddingLeft() {
@@ -217,6 +246,7 @@ public class ReadView extends View {
 
     public void setmPaddingRight(int paddingRight) {
         this.mPaddingRight = paddingRight;
+        setPaint();
     }
 
     public int getmPaddingRight() {
@@ -225,6 +255,7 @@ public class ReadView extends View {
 
     public void setLetterSpacing(float letterSpacing) {
         this.mLetterSpacing = letterSpacing;
+        setPaint();
     }
 
     public float getmLetterSpacing() {
@@ -233,6 +264,7 @@ public class ReadView extends View {
 
     public void setLineSpacing(float lineSpacing) {
         this.mLineSpacing = lineSpacing;
+        setPaint();
     }
 
     public float getmLineSpacing() {
@@ -257,5 +289,36 @@ public class ReadView extends View {
 
     public void setTextLines(ArrayList<String> textLines) {
         this.textLines = textLines;
+    }
+
+    public void setBattery(String mBattery) {
+        this.mBattery = mBattery;
+    }
+
+    public String getBattery() {
+        return mBattery;
+    }
+
+    public void setBookName(String mBookName) {
+        this.mBookName = mBookName;
+    }
+
+    public String getBookName() {
+        return mBookName;
+    }
+
+    public void setProgress(String mProgress) {
+        this.mProgress = mProgress;
+    }
+
+    public String getProgress() {
+        return mProgress;
+    }
+
+    public void setBottomInfomations(String battery, String name, String progress) {
+        setBattery(battery);
+        setBookName(name);
+        setProgress(progress);
+//        invalidate();
     }
 }

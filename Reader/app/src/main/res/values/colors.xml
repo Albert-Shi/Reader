@@ -5,4 +5,8 @@
     <color name="colorAccent">#FF4081</color>
 
     <color name="black_overlay">#66000000</color>
+    <!--
+    以下为自定义颜色
+    -->
+    <color name="translucent_bg">#c8000000</color>
 </resources>

@@ -52,6 +52,9 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         Bitmap bitmap = BitmapFactory.decodeResource(mainActivity.getResources(), R.drawable.book_cover).copy(Bitmap.Config.ARGB_8888, true);
         //*
         Paint p = new Paint();
+        //创建Typeface字体对象
+        Typeface typeface = Typeface.createFromAsset(mainActivity.getAssets(), "fonts/华文行楷.ttf");
+
         Canvas canvas = new Canvas(bitmap);
 //        canvas.drawColor(Color.RED);
 ///        p.setTextSize(50);
@@ -59,7 +62,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         p.setAntiAlias(true);
 //        p.setColor(Color.rgb(236, 106, 92));
         p.setColor(Color.rgb(41, 36, 33));
-        p.setTypeface(Typeface.DEFAULT_BOLD);
+        p.setTypeface(typeface);
         String text = mData.get(position).getName();
         int Y = 70;
         if (text.length() > 6)

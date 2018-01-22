@@ -1,7 +1,11 @@
 package com.shishuheng.reader.ui.activities;
 
 import android.annotation.SuppressLint;
+import android.content.BroadcastReceiver;
 import android.content.ContentValues;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.BitmapFactory;
@@ -20,6 +24,7 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
+import android.widget.Toast;
 
 import com.shishuheng.reader.R;
 import com.shishuheng.reader.datastructure.ActivitySerializable;
@@ -40,6 +45,13 @@ public class FullscreenActivity extends AppCompatActivity {
     private int screenTextSize;
     private ActivitySerializable activitySerializable;
     private TextFragment fragment;
+
+    private int textSize_Settings = 3;
+
+    //电池信息接收器
+    private BroadcastReceiver batteryReceiver;
+    //电量百分比
+    private String batteryPercent = "正在获取数据";
 
     /**
      * Whether or not the system UI should be auto-hidden after
@@ -152,32 +164,61 @@ public class FullscreenActivity extends AppCompatActivity {
         // operations to prevent the jarring behavior of controls going away
         // while interacting with the UI.
 //        findViewById(R.id.dummy_button).setOnTouchListener(mDelayHideTouchListener);
-        BookInformationDatabaseOpenHelper helper = new BookInformationDatabaseOpenHelper(this, Utilities.DATABASE_NAME, null, Utilities.DATABASE_VERSION);
-        SQLiteDatabase db = helper.getWritableDatabase();
-        String q1 = "select readPointer from Books where path=?";
-        String q2 = "select codingFormat from Books where path=?";
-        String q3 = "select totality from Books where path=?";
-        Cursor cursor = db.rawQuery(q1, new String[]{currentTxt.getPath()});
-        int position;
-        if (cursor.moveToFirst()) {
-            position = cursor.getInt(cursor.getColumnIndex("readPointer"));
-            currentTxt.setHasReadPointer(position);
-        }
-        cursor = db.rawQuery(q2, new String[]{currentTxt.getPath()});
-        if (cursor.moveToFirst()) {
-            position = cursor.getInt(cursor.getColumnIndex("codingFormat"));
-            currentTxt.setCodingFormat(position);
-        }
-        cursor = db.rawQuery(q3, new String[]{currentTxt.getPath()});
-        if (cursor.moveToFirst()) {
-            position = cursor.getInt(cursor.getColumnIndex("totality"));
-            currentTxt.setTotality(position);
+
+        //获取书籍和设置信息
+        try {
+            BookInformationDatabaseOpenHelper helper = new BookInformationDatabaseOpenHelper(this, Utilities.DATABASE_NAME, null, Utilities.DATABASE_VERSION);
+            SQLiteDatabase db = helper.getWritableDatabase();
+            //书籍信息查询
+            String q1 = "select readPointer from Books where path=?";
+            String q2 = "select codingFormat from Books where path=?";
+            String q3 = "select totality from Books where path=?";
+            //设置信息查询
+            String q4 = "select textSize from Settings where id=?";
+            Cursor cursor = db.rawQuery(q1, new String[]{currentTxt.getPath()});
+            int position;
+            if (cursor.moveToFirst()) {
+                position = cursor.getInt(cursor.getColumnIndex("readPointer"));
+                currentTxt.setHasReadPointer(position);
+            }
+            cursor = db.rawQuery(q2, new String[]{currentTxt.getPath()});
+            if (cursor.moveToFirst()) {
+                position = cursor.getInt(cursor.getColumnIndex("codingFormat"));
+                currentTxt.setCodingFormat(position);
+            }
+            cursor = db.rawQuery(q3, new String[]{currentTxt.getPath()});
+            if (cursor.moveToFirst()) {
+                position = cursor.getInt(cursor.getColumnIndex("totality"));
+                currentTxt.setTotality(position);
+            }
+            cursor = db.rawQuery(q4, new String[]{"1"});
+            if (cursor.moveToFirst()) {
+                position = cursor.getInt(cursor.getColumnIndex("textSize"));
+                textSize_Settings = position;
+            }
+
+            db.close();
+        } catch (Exception e) {
+            Toast.makeText(this, "读取数据库出错，可尝试清除应用数据，或将应用卸载后重新安装", Toast.LENGTH_SHORT).show();
         }
 
-        db.close();
+        //创建电池信息接收器 此处参考 http://www.jb51.net/article/72799.htm
+        batteryReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                int current=intent.getExtras().getInt("level");//获得当前电量
+                int total=intent.getExtras().getInt("scale");//获得总电量
+                int percent=current*100/total;
+                batteryPercent = percent+"%";
+            }
+        };
+        IntentFilter filter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
+        registerReceiver(batteryReceiver, filter);
 
+        //设置文本显示
         setTextContent();
 
+        //设置ActionBar自定义背景
         ActionBar actionBar = getSupportActionBar();
         actionBar.setTitle(currentTxt.getName());
         actionBar.setBackgroundDrawable(getDrawable(R.drawable.toolbar_bg_fullscreen));
@@ -295,8 +336,10 @@ public class FullscreenActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-//        long pointer = fragment.getCurrenBook().getPointer((int) (fragment.getCurrenBook().getBook().size() - fragment.lineTotalNumber), fragment.lineTotalNumber);
-//        if (pointer > -1) {
+        if (mVisible) {
+            toggle();
+        } else {
+            //保存书籍信息到数据库
             if (currentTxt.getHasReadPointer() < 0)
                 currentTxt.setHasReadPointer(0);
             BookInformationDatabaseOpenHelper helper = new BookInformationDatabaseOpenHelper(this, Utilities.DATABASE_NAME, null, Utilities.DATABASE_VERSION);
@@ -306,19 +349,25 @@ public class FullscreenActivity extends AppCompatActivity {
             ContentValues values = new ContentValues();
             values.put("readPointer", currentTxt.getHasReadPointer());
             values.put("codingFormat", currentTxt.getCodingFormat());
-//            values.put("firstLineLastExit", currentTxt.getFirstLineLastExit());
-//            String de = "drop table Books";
-//            String rq = "Update Books Set readPointer="+pointer+" Where path="+"'"+currentTxt.getPath()+"'";
-            db.update("Books", values, "path=?", new String[] {currentTxt.getPath()});
-//            db.execSQL(de);
-/*
-            Cursor cursor = db.query("Books", null, null, null, null, null, null);
-            while (cursor.moveToNext()) {
-                String path = cursor.getString(cursor.getColumnIndex("path"));
-            }
-*/
+            db.update("Books", values, "path=?", new String[]{currentTxt.getPath()});
             db.close();
-//        }
-        super.onBackPressed();
+
+            //注销电池信息接收器
+            unregisterReceiver(batteryReceiver);
+
+            super.onBackPressed();
+        }
+    }
+
+    public int getTextSize_Settings() {
+        return textSize_Settings;
+    }
+
+    public void setTextSize_Settings(int textSize_Settings) {
+        this.textSize_Settings = textSize_Settings;
+    }
+
+    public String getBatteryPercent() {
+        return batteryPercent;
     }
 }

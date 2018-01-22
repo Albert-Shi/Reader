@@ -11,118 +11,190 @@
 
     <!-- This FrameLayout insets its children based on system windows using
          android:fitsSystemWindows. -->
-    <LinearLayout
+        <!-- fullscreen_content_controls 默认背景色
+        android:background="@color/black_overlay"
+        -->
+    <FrameLayout
         android:id="@+id/fullscreen_content_controls"
         style="?metaButtonBarStyle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|center_horizontal"
-        android:background="@color/black_overlay"
-        android:orientation="vertical"
+        android:background="@color/translucent_bg"
         tools:ignore="UselessParent">
-
-        <!--
-        <Button
-            android:id="@+id/changeCodingFormat_UTF8"
-            style="?metaButtonBarButtonStyle"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="UTF-8" />
-
-        <View
-            android:layout_width="30dp"
-            android:layout_height="match_parent" />
-        -->
-
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
-        <TextView
-            android:id="@+id/changeCodingFormat"
-            style="?metaButtonBarButtonStyle"
-            android:layout_height="wrap_content"
-            android:layout_width="wrap_content"
-            android:text="切换编码" />
-            <RadioGroup
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="horizontal"
-                android:gravity="center"
-                android:id="@+id/encode_RadioGroup">
-                <RadioButton
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="GBK"
-                    android:textSize="10dp"
-                    android:textColor="@color/colorAccent"
-                    android:id="@+id/encodeFormat_GBK"/>
-                <RadioButton
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="GBK2312"
-                    android:textSize="10dp"
-                    android:textColor="@color/colorAccent"
-                    android:id="@+id/encodeFormat_GB2312"/>
-                <RadioButton
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="GB18030"
-                    android:textSize="10dp"
-                    android:textColor="@color/colorAccent"
-                    android:id="@+id/encodeFormat_GB18030"/>
-                <RadioButton
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="UTF-8"
-                    android:textSize="10dp"
-                    android:textColor="@color/colorAccent"
-                    android:id="@+id/encodeFormat_UTF8"/>
-            </RadioGroup>
-        </LinearLayout>
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="2dp" />
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center">
-            <TextView
-                android:layout_width="wrap_content"
+            android:orientation="vertical">
+            <!--
+            <Button
+                android:id="@+id/changeCodingFormat_UTF8"
+                style="?metaButtonBarButtonStyle"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:paddingLeft="10dp"
-                android:textSize="10dp"
-                android:textColor="@color/colorAccent"
-                android:text="进度"/>
+                android:layout_weight="1"
+                android:text="UTF-8" />
+
+            <View
+                android:layout_width="30dp"
+                android:layout_height="match_parent" />
+            -->
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:gravity="right">
+                android:layout_height="wrap_content">
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:paddingRight="10dp"
-                    android:text="0.00%"
-                    android:textColor="@color/colorAccent"
-                    android:textSize="10dp"
-                    android:id="@+id/seekBarPercentage"/>
+                    style="?metaButtonBarButtonStyle"
+                    android:text="夜间模式"/>
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+                    <View
+                        android:layout_width="10dp"
+                        android:layout_height="wrap_content"/>
+                    <CheckBox
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:textColor="@color/radiobutton_bg"
+                        android:id="@+id/checkbox_nightShift"
+                        android:text="开启"/>
+                </LinearLayout>
             </LinearLayout>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    style="?metaButtonBarButtonStyle"
+                    android:text="字体大小"/>
+                <RadioGroup
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center"
+                    android:orientation="horizontal"
+                    android:id="@+id/textSize_RadioGroup">
+                    <RadioButton
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/radiobutton_bg"
+                        android:text="最小"
+                        android:id="@+id/textSize_minimum"/>
+                    <RadioButton
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/radiobutton_bg"
+                        android:text="小"
+                        android:id="@+id/textSize_small"/>
+                    <RadioButton
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/radiobutton_bg"
+                        android:text="中"
+                        android:id="@+id/textSize_medium"/>
+                    <RadioButton
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/radiobutton_bg"
+                        android:text="大"
+                        android:id="@+id/textSize_large"/>
+                    <RadioButton
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/radiobutton_bg"
+                        android:text="最大"
+                        android:id="@+id/textSize_maximum"/>
+
+
+                </RadioGroup>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+            <TextView
+                android:id="@+id/changeCodingFormat"
+                style="?metaButtonBarButtonStyle"
+                android:layout_height="wrap_content"
+                android:layout_width="wrap_content"
+                android:text="切换编码" />
+                <RadioGroup
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="horizontal"
+                    android:gravity="center"
+                    android:id="@+id/encode_RadioGroup">
+                    <RadioButton
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="GBK"
+                        android:textSize="10dp"
+                        android:textColor="@color/radiobutton_bg"
+                        android:id="@+id/encodeFormat_GBK"/>
+                    <RadioButton
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="GBK2312"
+                        android:textSize="10dp"
+                        android:textColor="@color/radiobutton_bg"
+                        android:id="@+id/encodeFormat_GB2312"/>
+                    <RadioButton
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="GB18030"
+                        android:textSize="10dp"
+                        android:textColor="@color/radiobutton_bg"
+                        android:id="@+id/encodeFormat_GB18030"/>
+                    <RadioButton
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="UTF-8"
+                        android:textSize="10dp"
+                        android:textColor="@color/radiobutton_bg"
+                        android:id="@+id/encodeFormat_UTF8"/>
+                </RadioGroup>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingLeft="10dp"
+                    android:textSize="10dp"
+                    android:textColor="@color/colorAccent"
+                    android:text="进度"/>
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="right">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:paddingRight="10dp"
+                        android:text="0.00%"
+                        android:textColor="@color/colorAccent"
+                        android:textSize="10dp"
+                        android:id="@+id/seekBarPercentage"/>
+                </LinearLayout>
+            </LinearLayout>
+            <SeekBar
+                android:id="@+id/seekBar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingLeft="@dimen/activity_horizontal_margin"
+                android:paddingRight="@dimen/activity_horizontal_margin" />
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="10dp" />
+
         </LinearLayout>
-        <SeekBar
-            android:id="@+id/seekBar"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:paddingLeft="@dimen/activity_horizontal_margin"
-            android:paddingRight="@dimen/activity_horizontal_margin" />
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="10dp" />
-
-
-    </LinearLayout>
+    </FrameLayout>
 
 </FrameLayout>

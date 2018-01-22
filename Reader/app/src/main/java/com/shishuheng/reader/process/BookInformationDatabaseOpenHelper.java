@@ -19,6 +19,11 @@ public class BookInformationDatabaseOpenHelper extends SQLiteOpenHelper {
             + "readPointer integer,"
             + "codingFormat integer,"
             + "totality integer)";
+
+    private static String CREAT_SETTING = "create table Settings(" +
+            "id integer primary key," +
+            "textSize integer)";
+
     private Context mContext;
     public BookInformationDatabaseOpenHelper(Context context, String name, SQLiteDatabase.CursorFactory factory, int version) {
         super(context, name, factory, version);
@@ -26,6 +31,7 @@ public class BookInformationDatabaseOpenHelper extends SQLiteOpenHelper {
     }
     @Override
     public void onCreate(SQLiteDatabase db) {
+        db.execSQL(CREAT_SETTING);
         db.execSQL(CREAT_BOOKSINFO);
     }
 

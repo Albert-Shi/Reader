@@ -1,6 +1,12 @@
 package com.shishuheng.reader.ui.fragment;
 
 import android.app.Activity;
+import android.content.BroadcastReceiver;
+import android.content.ContentValues;
+import android.content.Context;
+import android.content.Intent;
+import android.database.sqlite.SQLiteDatabase;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.CardView;
@@ -12,6 +18,9 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
+import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
@@ -23,6 +32,7 @@ import com.shishuheng.reader.R;
 import com.shishuheng.reader.datastructure.ScreenSize;
 import com.shishuheng.reader.datastructure.TxtDetail;
 import com.shishuheng.reader.process.Book;
+import com.shishuheng.reader.process.BookInformationDatabaseOpenHelper;
 import com.shishuheng.reader.process.Utilities;
 import com.shishuheng.reader.ui.coustomize.ReadView;
 import com.shishuheng.reader.ui.coustomize.ReaderTextView;
@@ -50,6 +60,8 @@ public class TextFragment extends Fragment {
 
     private ScreenSize screenSize;
 
+    private int textSizePixel = 48;
+
     ArrayList<String> text = null;
 
     private Book currenBook;
@@ -57,6 +69,9 @@ public class TextFragment extends Fragment {
     private SeekBar seekBar = null;
     //显示进度条百分百
     private TextView seekBarPercentage = null;
+    //进度条百分比
+    String percentage;
+
 
 
     //获取页面设置参数
@@ -131,50 +146,20 @@ public class TextFragment extends Fragment {
         mainDisplay.setPadding(20,8,8,8);
         card.addView(mainDisplay);
 
-        lineCharacterNumber =(int) ((screenSize.getWidth()-80)/(mainDisplay.getTextSize()));
-        lineTotalNumber = (int) ((screenSize.getHeight() - 80)/(mainDisplay.getmLineSpacing()+mainDisplay.getTextSize()));
-
         txt = ((FullscreenActivity)rootActivity).getTxtDetail();
 
-//        Button codingFormat_button = (Button) getActivity().findViewById(R.id.changeCodingFormat);
         final Book book = new Book(getActivity(), new File(txt.getPath()), lineTotalNumber, lineCharacterNumber, txt.getHasReadPointer(), txt.getTotality(), screenSize.getHeight(), screenSize.getWidth());
-        book.setLineTotalNumber(lineTotalNumber);
-        book.setLineCharacterNumber(lineCharacterNumber);
+//        book.setLineTotalNumber(lineTotalNumber);
+//        book.setLineCharacterNumber(lineCharacterNumber);
         txt.sychronizationToBook(book);
         currenBook = book;
-        /*
-        codingFormat_button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (book.getCodingFormat() == 0) {
-                    txt.setCodingFormat(1);
-                    book.setCodingFormat(1);
-                    Toast.makeText(rootActivity, "已切换为GBK编码 请重新打开书籍", Toast.LENGTH_SHORT).show();
-                } else if (book.getCodingFormat() == 1) {
-                    txt.setCodingFormat(2);
-                    book.setCodingFormat(2);
-                    Toast.makeText(rootActivity, "已切换为GB2312编码 请重新打开书籍", Toast.LENGTH_SHORT).show();
-                } else if (book.getCodingFormat() == 2) {
-                    txt.setCodingFormat(3);
-                    book.setCodingFormat(3);
-                    Toast.makeText(rootActivity, "已切换为GB18030编码 请重新打开书籍", Toast.LENGTH_SHORT).show();
-                } else if (book.getCodingFormat() == 3) {
-                    txt.setCodingFormat(4);
-                    book.setCodingFormat(4);
-                    Toast.makeText(rootActivity, "已切换为UTF-8编码 请重新打开书籍", Toast.LENGTH_SHORT).show();
-                } else if (book.getCodingFormat() == 4) {
-                    txt.setCodingFormat(0);
-                    book.setCodingFormat(0);
-                    Toast.makeText(rootActivity, "已关闭编码 请重新打开书籍", Toast.LENGTH_SHORT).show();
-                }
-            }
-        });
-        */
-
-        //        needToadd = 2*(text.length()-lineTotalNumber)+brCount;
+        //设置字体大小
+        changeTextSize();
+        //计算页面可显示的字数
+        reComputationCharacterNumber(book);
+        //将文本显示
         refreshMainDisplay(book);
 
-//        mainDisplay.setMovementMethod(ScrollingMovementMethod.getInstance());
         GestureDetector.SimpleOnGestureListener sogl = new GestureDetector.SimpleOnGestureListener() {
             @Override
             public boolean onDown(MotionEvent e) {
@@ -231,7 +216,6 @@ public class TextFragment extends Fragment {
                 return super.onSingleTapConfirmed(e);
             }
         };
-
         gestureDetector = new GestureDetector(getActivity(), sogl);
 
         mainDisplay.setOnTouchListener(new View.OnTouchListener() {
@@ -241,6 +225,7 @@ public class TextFragment extends Fragment {
                 return gestureDetector.onTouchEvent(event);
             }
         });
+
 
         //设置SeekBar和百分比
         seekBarPercentage = getActivity().findViewById(R.id.seekBarPercentage);
@@ -253,7 +238,7 @@ public class TextFragment extends Fragment {
                 //格式化两位小数 参考 http://blog.csdn.net/chivalrousli/article/details/51122113
                 NumberFormat percentageFormat = NumberFormat.getPercentInstance();
                 percentageFormat.setMaximumFractionDigits(2);
-                String percentage = percentageFormat.format((float)seekBar.getProgress()/seekBar.getMax());
+                percentage = percentageFormat.format((float)seekBar.getProgress()/seekBar.getMax());
                 seekBarPercentage.setText(percentage);
             }
 
@@ -273,28 +258,35 @@ public class TextFragment extends Fragment {
                 //格式化两位小数 参考 http://blog.csdn.net/chivalrousli/article/details/51122113
                 NumberFormat percentageFormat = NumberFormat.getPercentInstance();
                 percentageFormat.setMaximumFractionDigits(2);
-                String percentage = percentageFormat.format((float)seekBar.getProgress()/seekBar.getMax());
+                percentage = percentageFormat.format((float)seekBar.getProgress()/seekBar.getMax());
                 seekBarPercentage.setText(percentage);
+
+                //设置底栏信息
+                String b = ((FullscreenActivity)getActivity()).getBatteryPercent();
+                mainDisplay.setBottomInfomations(b, txt.getName(), percentage);
 
             }
         });
         //格式化两位小数 参考 http://blog.csdn.net/chivalrousli/article/details/51122113
         NumberFormat percentageFormat = NumberFormat.getPercentInstance();
         percentageFormat.setMaximumFractionDigits(2);
-        String percentage = percentageFormat.format((float)seekBar.getProgress()/seekBar.getMax());
+        percentage = percentageFormat.format((float)seekBar.getProgress()/seekBar.getMax());
         seekBarPercentage.setText(percentage);
+        //设置底栏信息
+        String b = ((FullscreenActivity)getActivity()).getBatteryPercent();
+        mainDisplay.setBottomInfomations(b, txt.getName(), percentage);
 
-        //设置RadioButton
-        RadioGroup group = getActivity().findViewById(R.id.encode_RadioGroup);
-        RadioButton radioButton;
+        //设置编码RadioButton
+        RadioGroup encodeGroup = getActivity().findViewById(R.id.encode_RadioGroup);
+        RadioButton encodeRadioButton;
         switch (book.getCodingFormat()) {
-            case 2: radioButton = rootActivity.findViewById(R.id.encodeFormat_GB2312);break;
-            case 3: radioButton = rootActivity.findViewById(R.id.encodeFormat_GB18030);break;
-            case 4: radioButton = rootActivity.findViewById(R.id.encodeFormat_UTF8);break;
-            default: radioButton = rootActivity.findViewById(R.id.encodeFormat_GBK);break;
+            case 2: encodeRadioButton = rootActivity.findViewById(R.id.encodeFormat_GB2312);break;
+            case 3: encodeRadioButton = rootActivity.findViewById(R.id.encodeFormat_GB18030);break;
+            case 4: encodeRadioButton = rootActivity.findViewById(R.id.encodeFormat_UTF8);break;
+            default: encodeRadioButton = rootActivity.findViewById(R.id.encodeFormat_GBK);break;
         }
-        radioButton.setChecked(true);
-        group.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+        encodeRadioButton.setChecked(true);
+        encodeGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(RadioGroup group, int checkedId) {
                 RadioButton radioButton = group.findViewById(checkedId);
@@ -330,6 +322,57 @@ public class TextFragment extends Fragment {
             }
         });
 
+        //设置字体RadioButton
+        RadioGroup textSizeGroup = getActivity().findViewById(R.id.textSize_RadioGroup);
+        RadioButton textSizeRadioButton;
+        switch (((FullscreenActivity) getActivity()).getTextSize_Settings()) {
+            case 1: textSizeRadioButton = getActivity().findViewById(R.id.textSize_minimum); break;
+            case 2: textSizeRadioButton = getActivity().findViewById(R.id.textSize_small); break;
+            case 3: textSizeRadioButton = getActivity().findViewById(R.id.textSize_medium); break;
+            case 4: textSizeRadioButton = getActivity().findViewById(R.id.textSize_large); break;
+            case 5: textSizeRadioButton = getActivity().findViewById(R.id.textSize_maximum); break;
+            default: textSizeRadioButton = getActivity().findViewById(R.id.textSize_medium); break;
+        }
+        textSizeRadioButton.setChecked(true);
+        textSizeGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(RadioGroup group, int checkedId) {
+                switch (checkedId) {
+                    case R.id.textSize_minimum: Utilities.updateData(getActivity(), Utilities.TABLE_SETTINGS, 1, null, "textSize", 1); ((FullscreenActivity)getActivity()).setTextSize_Settings(1); break;
+                    case R.id.textSize_small: Utilities.updateData(getActivity(), Utilities.TABLE_SETTINGS, 1, null, "textSize", 2); ((FullscreenActivity)getActivity()).setTextSize_Settings(2); break;
+                    case R.id.textSize_medium: Utilities.updateData(getActivity(), Utilities.TABLE_SETTINGS, 1, null, "textSize", 3); ((FullscreenActivity)getActivity()).setTextSize_Settings(3); break;
+                    case R.id.textSize_large: Utilities.updateData(getActivity(), Utilities.TABLE_SETTINGS, 1, null, "textSize", 4); ((FullscreenActivity)getActivity()).setTextSize_Settings(4); break;
+                    case R.id.textSize_maximum: Utilities.updateData(getActivity(), Utilities.TABLE_SETTINGS, 1, null, "textSize", 5); ((FullscreenActivity)getActivity()).setTextSize_Settings(5); break;
+                }
+                changeTextSize();
+                reComputationCharacterNumber(book);
+                refreshMainDisplay(book);
+            }
+        });
+        //设置夜间模式
+        final CheckBox checkBox = getActivity().findViewById(R.id.checkbox_nightShift);
+        final FrameLayout layout = view.findViewById(R.id.container_fragment);
+        checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked) {
+                    mainDisplay.setTextColor(Color.rgb(0x56, 0x56, 0x56));
+                    layout.setBackgroundColor(Color.rgb(0x00, 0x00, 0x00));
+                    card.setCardBackgroundColor(Color.rgb(0x0d, 0x0e, 0x0d));
+                    //card.setRadius(20);
+                    mainDisplay.invalidate();
+                    checkBox.setText("关闭");
+                } else {
+                    mainDisplay.setTextColor(Color.rgb(0x00, 0x00, 0x00));
+                    layout.setBackgroundColor(Color.rgb(0xff, 0xff, 0xff));
+                    card.setCardBackgroundColor(Color.rgb(0xf0, 0xeb, 0xd5));
+                    //card.setRadius(20);
+                    mainDisplay.invalidate();
+                    checkBox.setText("开启");
+                }
+            }
+        });
+
         return view;
     }
 
@@ -341,6 +384,11 @@ public class TextFragment extends Fragment {
         book.setReadPointer(txt.getHasReadPointer());
         mainDisplay.setText(text);
         seekBar.setProgress((int)book.getReadPointer());
+
+        //设置底栏信息
+        String b = ((FullscreenActivity)getActivity()).getBatteryPercent();
+        mainDisplay.setBottomInfomations(b, txt.getName(), percentage);
+
         return 0;
     }
 
@@ -361,7 +409,29 @@ public class TextFragment extends Fragment {
             book.setReadPointer(0);
         }
         seekBar.setProgress((int)book.getReadPointer());
+        //设置底栏信息
+        String b = ((FullscreenActivity)getActivity()).getBatteryPercent();
+        mainDisplay.setBottomInfomations(b, txt.getName(), percentage);
+
         return 0;
+    }
+
+    public void changeTextSize() {
+        switch (((FullscreenActivity)getActivity()).getTextSize_Settings()) {
+            case 1: textSizePixel = 16; break;
+            case 2: textSizePixel = 32; break;
+            case 3: textSizePixel = 48; break;
+            case 4: textSizePixel = 60; break;
+            case 5: textSizePixel = 72; break;
+        }
+        mainDisplay.setTextSize(textSizePixel);
+    }
+
+    public void reComputationCharacterNumber(Book book) {
+        lineCharacterNumber =(int) ((screenSize.getWidth()-80)/(mainDisplay.getTextSize()));
+        lineTotalNumber = (int) ((screenSize.getHeight() - 80)/(mainDisplay.getmLineSpacing()+mainDisplay.getTextSize()));
+        book.setLineCharacterNumber(lineCharacterNumber);
+        book.setLineTotalNumber(lineTotalNumber);
     }
 
     public void refreshMainDisplay(Book book) {

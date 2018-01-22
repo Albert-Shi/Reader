@@ -28,6 +28,7 @@ import com.shishuheng.reader.adapter.RecyclerViewAdapter;
 
 import java.io.File;
 import java.io.RandomAccessFile;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 
 /**
@@ -37,6 +38,8 @@ import java.util.ArrayList;
 public class Utilities {
     //数据库名称
     public static String DATABASE_NAME = "BookReader.db";
+    public static String TABLE_BOOKS = "Books";
+    public static String TABLE_SETTINGS = "Settings";
     public static int DATABASE_VERSION = 1;
     //RecyclerView的Adapter
     RecyclerViewAdapter recyclerViewAdapter = null;
@@ -65,50 +68,60 @@ public class Utilities {
         final ArrayList<TxtDetail> txts = Utilities.getDirectoryTXTFiles();
         activity.allTxts = txts;
         //书籍信息写入数据库 此处参考 https://www.jianshu.com/p/0d8fa55d603b
-        BookInformationDatabaseOpenHelper helper = new BookInformationDatabaseOpenHelper(activity, DATABASE_NAME, null, DATABASE_VERSION);
-        SQLiteDatabase database = helper.getWritableDatabase();
-        ContentValues values = new ContentValues();
-        if (txts != null && txts.size() != 0) {
-            for (int i = 0; i < txts.size(); i++) {
+        try {
+            BookInformationDatabaseOpenHelper helper = new BookInformationDatabaseOpenHelper(activity, DATABASE_NAME, null, DATABASE_VERSION);
+            SQLiteDatabase database = helper.getWritableDatabase();
+            ContentValues values = new ContentValues();
+            if (txts != null && txts.size() != 0) {
+                for (int i = 0; i < txts.size(); i++) {
 
-                //String sql = "insert into Books(path, author, title, category, image, id, readPointer) values (?, ?, ?, ?, ?, ?, ?)";
+                    //String sql = "insert into Books(path, author, title, category, image, id, readPointer) values (?, ?, ?, ?, ?, ?, ?)";
 
-                values.clear();
-                values.put("path", txts.get(i).getPath());
-                values.put("author", "");
-                values.put("title", txts.get(i).getName().replace(".txt", ""));
-                values.put("category", "");
-                values.put("image", "");
-                values.put("id", i);
-                values.put("readPointer", 0);
-                values.put("codingFormat", 1);
-                values.put("totality", 0);
-                database.insert("Books", null, values);
-
+                    values.clear();
+                    values.put("path", txts.get(i).getPath());
+                    values.put("author", "");
+                    values.put("title", txts.get(i).getName().replace(".txt", ""));
+                    values.put("category", "");
+                    values.put("image", "");
+                    values.put("id", i);
+                    values.put("readPointer", 0);
+                    values.put("codingFormat", 1);
+                    values.put("totality", 0);
+                    database.insert(TABLE_BOOKS, null, values);
 //            database.execSQL(sql, new Object[] {txts.get(i).getPath(), "", txts.get(i).getName().replace(".txt", ""), "", "", i, 0});
-            }
-            database.close();
-
-            final SwipeRefreshLayout refreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.refreshLayout);
-            final RecyclerViewAdapter adapter = new RecyclerViewAdapter(activity, txts);
-            RecyclerView recyclerView = (RecyclerView) view.findViewById(R.id.display_listView);
-            recyclerView.setLayoutAnimation(AnimationUtils.loadLayoutAnimation(activity, R.anim.layout_animation_from_bottom));
-            recyclerView.setLayoutManager(new LinearLayoutManager(activity, LinearLayoutManager.VERTICAL, false));
-            recyclerView.setAdapter(adapter);
-            refreshLayout.setColorSchemeColors(Color.argb(255, 214, 69, 69));
-            refreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-                @Override
-                public void onRefresh() {
-                    adapter.notifyDataSetChanged();
-                    refreshLayout.setRefreshing(false);
-                    Toast.makeText(activity, "数据已更新", Toast.LENGTH_SHORT).show();
                 }
-            });
-        } else {
-            AlertDialog.Builder builder = new AlertDialog.Builder(activity);
-            builder.setTitle("提示");
-            builder.setMessage("未找到书籍！若是第一次打开此应用，请退出后重新打开即可");
-            builder.create().show();
+                //创建设置信息
+                values.clear();
+                values.put("id", 1);
+                values.put("textSize", 3);
+                database.insert(TABLE_SETTINGS, null, values);
+
+                //关闭数据库
+                database.close();
+
+                final SwipeRefreshLayout refreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.refreshLayout);
+                final RecyclerViewAdapter adapter = new RecyclerViewAdapter(activity, txts);
+                RecyclerView recyclerView = (RecyclerView) view.findViewById(R.id.display_listView);
+                recyclerView.setLayoutAnimation(AnimationUtils.loadLayoutAnimation(activity, R.anim.layout_animation_from_bottom));
+                recyclerView.setLayoutManager(new LinearLayoutManager(activity, LinearLayoutManager.VERTICAL, false));
+                recyclerView.setAdapter(adapter);
+                refreshLayout.setColorSchemeColors(Color.argb(255, 214, 69, 69));
+                refreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+                    @Override
+                    public void onRefresh() {
+                        adapter.notifyDataSetChanged();
+                        refreshLayout.setRefreshing(false);
+                        Toast.makeText(activity, "数据已更新", Toast.LENGTH_SHORT).show();
+                    }
+                });
+            } else {
+                AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+                builder.setTitle("提示");
+                builder.setMessage("未找到书籍！若是第一次打开此应用，请退出后重新打开即可");
+                builder.create().show();
+            }
+        } catch (Exception e) {
+            Toast.makeText(activity, "读取数据时出错，可尝试清除应用数据，或将应用卸载后重新安装", Toast.LENGTH_SHORT).show();
         }
 
         /*
@@ -163,11 +176,14 @@ public class Utilities {
         menu.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                File file =  new File(mainActivity.currentTxt.getPath());
                 AlertDialog.Builder builder = new AlertDialog.Builder(mainActivity);
                 builder.setTitle("详细信息");
+                String info = "详细位置:"+file.getAbsolutePath() +"\n\n"+ "文件大小:"+getFileSize(file.length());
+                builder.setMessage(info);
                 switch (position) {
-                    case 0: Utilities.deleteFile(mainActivity, new File(mainActivity.currentTxt.getPath())); recyclerViewAdapter.removeItem(itemPosition); alertDialog.dismiss(); break;
-                    case 1: builder.create().show(); break;
+                    case 0: Utilities.deleteFile(mainActivity, file); recyclerViewAdapter.removeItem(itemPosition); alertDialog.dismiss(); break;
+                    case 1: builder.create().show(); alertDialog.dismiss(); break;
                 }
             }
         });
@@ -229,21 +245,50 @@ public class Utilities {
             Toast.makeText(mainActivity, "文件不存在或者文件是文件夹", Toast.LENGTH_SHORT).show();
     }
 
-    public static void updateData(Activity activity, String path, String field, long value) {
+    public static void updateData(Activity activity, String table, int id_setting, String book_path, String field, long value) {
         BookInformationDatabaseOpenHelper helper = new BookInformationDatabaseOpenHelper(activity, DATABASE_NAME, null, DATABASE_VERSION);
         SQLiteDatabase database = helper.getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put(field, value);
-        database.update("Books", values, "path=?", new String[]{path});
+        if (book_path!=null && book_path.length()!=0 && !book_path.equals(""))
+            database.update(table, values, "path=?", new String[]{book_path});
+        else if (id_setting > -1)
+            database.update(table, values, "id=?", new String[] {id_setting+""});
         database.close();
     }
 
-    public static void updateData(Activity activity, String path, String field, String value) {
+    public static void updateData(Activity activity, String table, int id_setting, String book_path, String field, String value) {
         BookInformationDatabaseOpenHelper helper = new BookInformationDatabaseOpenHelper(activity, DATABASE_NAME, null, DATABASE_VERSION);
         SQLiteDatabase database = helper.getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put(field, value);
-        database.update("Books", values, "path=?", new String[]{path});
+        if (book_path!=null && book_path.length()!=0 && !book_path.equals(""))
+            database.update(table, values, "path=?", new String[]{book_path});
+        else if (id_setting > -1)
+            database.update(table, values, "id=?", new String[] {id_setting+""});
         database.close();
+    }
+
+    public static String getFileSize(long size) {
+        int i = 1;
+        String unit = "B";
+        float temp = size;
+        while (temp >= 1024) {
+            temp /= 1024;
+            i++;
+        }
+        switch (i) {
+            case 1: unit = "B";break;
+            case 2: unit = "KB"; break;
+            case 3: unit = "MB"; break;
+            case 4: unit = "GB"; break;
+            case 5: unit = "TB"; break;
+            default: unit = "文件太大，已经不知道用什么单位了";
+        }
+        //格式化两位小数 参考 http://blog.csdn.net/chivalrousli/article/details/51122113
+        NumberFormat percentageFormat = NumberFormat.getNumberInstance();
+        percentageFormat.setMaximumFractionDigits(2);
+        String result = percentageFormat.format(temp) +" "+ unit;
+        return result;
     }
 }

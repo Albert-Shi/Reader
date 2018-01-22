@@ -361,7 +361,7 @@ public class Book extends Thread{
 //                                    s++;
 //                                }
                                 totality = in.available();
-                                Utilities.updateData(fullscreenActivity, filePath.getAbsolutePath(), "totality", totality);
+                                Utilities.updateData(fullscreenActivity,Utilities.TABLE_BOOKS, -1, filePath.getAbsolutePath(),"totality", totality);
 
                                 Looper.prepare();
                                 Toast.makeText(fullscreenActivity, "书籍总字数获取完成", Toast.LENGTH_SHORT).show();

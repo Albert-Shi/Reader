@@ -13,7 +13,6 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:id="@+id/card"
-            android:background="@drawable/round_rectangle_background"
             android:layout_margin="20px"
             app:cardCornerRadius="20px"
             app:cardBackgroundColor="#f0ebd5">
