@@ -4,6 +4,7 @@ import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.graphics.Color;
+import android.os.Environment;
 import android.support.v4.app.Fragment;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -28,6 +29,7 @@ import android.view.WindowManager;
 
 import com.shishuheng.reader.R;
 import com.shishuheng.reader.datastructure.TxtDetail;
+import com.shishuheng.reader.ui.filepicker.FilePicker;
 import com.shishuheng.reader.ui.fragment.HomeFragment;
 
 import java.util.ArrayList;
@@ -38,6 +40,7 @@ public class MainActivity extends AppCompatActivity
     public ArrayList<TxtDetail> allTxts = null;
     public Fragment currentFragment = null;
     private HomeFragment homeFragment = null;
+    private MainActivity activity = this;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,8 +63,12 @@ public class MainActivity extends AppCompatActivity
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                /*
                 Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
+                        */
+                FilePicker filePicker = new FilePicker(activity, Environment.getExternalStorageDirectory().getAbsolutePath());
+                filePicker.create().show();
             }
         });
 
