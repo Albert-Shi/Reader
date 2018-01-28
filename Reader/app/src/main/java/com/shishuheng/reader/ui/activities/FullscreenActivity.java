@@ -30,8 +30,10 @@ import com.shishuheng.reader.R;
 import com.shishuheng.reader.datastructure.ActivitySerializable;
 import com.shishuheng.reader.datastructure.TxtDetail;
 import com.shishuheng.reader.process.BookInformationDatabaseOpenHelper;
+import com.shishuheng.reader.process.DatabaseOperator;
 import com.shishuheng.reader.process.Utilities;
 import com.shishuheng.reader.ui.coustomize.ReadView;
+import com.shishuheng.reader.ui.fragment.OfficeFragment;
 import com.shishuheng.reader.ui.fragment.TextFragment;
 
 /**
@@ -44,7 +46,8 @@ public class FullscreenActivity extends AppCompatActivity {
     private int position;
     private int screenTextSize;
     private ActivitySerializable activitySerializable;
-    private TextFragment fragment;
+    private TextFragment textFragment;
+    private OfficeFragment officeFragment;
 
     private int textSize_Settings = 3;
 
@@ -165,42 +168,12 @@ public class FullscreenActivity extends AppCompatActivity {
         // while interacting with the UI.
 //        findViewById(R.id.dummy_button).setOnTouchListener(mDelayHideTouchListener);
 
-        //获取书籍和设置信息
-        try {
-            BookInformationDatabaseOpenHelper helper = new BookInformationDatabaseOpenHelper(this, Utilities.DATABASE_NAME, null, Utilities.DATABASE_VERSION);
-            SQLiteDatabase db = helper.getWritableDatabase();
-            //书籍信息查询
-            String q1 = "select readPointer from Books where path=?";
-            String q2 = "select codingFormat from Books where path=?";
-            String q3 = "select totality from Books where path=?";
-            //设置信息查询
-            String q4 = "select textSize from Settings where id=?";
-            Cursor cursor = db.rawQuery(q1, new String[]{currentTxt.getPath()});
-            int position;
-            if (cursor.moveToFirst()) {
-                position = cursor.getInt(cursor.getColumnIndex("readPointer"));
-                currentTxt.setHasReadPointer(position);
-            }
-            cursor = db.rawQuery(q2, new String[]{currentTxt.getPath()});
-            if (cursor.moveToFirst()) {
-                position = cursor.getInt(cursor.getColumnIndex("codingFormat"));
-                currentTxt.setCodingFormat(position);
-            }
-            cursor = db.rawQuery(q3, new String[]{currentTxt.getPath()});
-            if (cursor.moveToFirst()) {
-                position = cursor.getInt(cursor.getColumnIndex("totality"));
-                currentTxt.setTotality(position);
-            }
-            cursor = db.rawQuery(q4, new String[]{"1"});
-            if (cursor.moveToFirst()) {
-                position = cursor.getInt(cursor.getColumnIndex("textSize"));
-                textSize_Settings = position;
-            }
-
-            db.close();
-        } catch (Exception e) {
-            Toast.makeText(this, "读取数据库出错，可尝试清除应用数据，或将应用卸载后重新安装", Toast.LENGTH_SHORT).show();
-        }
+        //读取数据库中TXT书籍及应用相关设置
+        DatabaseOperator operator = new DatabaseOperator(this, DatabaseOperator.DATABASE_NAME, DatabaseOperator.DATABASE_VERSION);
+        currentTxt.setHasReadPointer(operator.getInt(DatabaseOperator.TABLE_BOOKS, "readPointer", "path", currentTxt.getPath()));
+        currentTxt.setCodingFormat(operator.getInt(DatabaseOperator.TABLE_BOOKS, "codingFormat", "path", currentTxt.getPath()));
+        currentTxt.setTotality(operator.getInt(DatabaseOperator.TABLE_BOOKS, "totality", "path", currentTxt.getPath()));
+        textSize_Settings = operator.getInt(DatabaseOperator.TABLE_SETTINGS, "textSize", "id", 1+"");
 
         //创建电池信息接收器 此处参考 http://www.jb51.net/article/72799.htm
         batteryReceiver = new BroadcastReceiver() {
@@ -216,7 +189,14 @@ public class FullscreenActivity extends AppCompatActivity {
         registerReceiver(batteryReceiver, filter);
 
         //设置文本显示
-        setTextContent();
+        if (currentTxt != null) {
+            String extension = currentTxt.getName().substring(currentTxt.getName().lastIndexOf('.'));
+            if (extension.equalsIgnoreCase(".txt")) {
+                setTextContent();
+            } else if (extension.equalsIgnoreCase(".doc") || extension.equalsIgnoreCase(".docx")) {
+                setOfficeView(currentTxt.getPath());
+            }
+        }
 
         //设置ActionBar自定义背景
         ActionBar actionBar = getSupportActionBar();
@@ -309,8 +289,8 @@ public class FullscreenActivity extends AppCompatActivity {
     }
 
     public void setTextContent() {
-        fragment = new TextFragment();
-        startFragment(fragment);
+        textFragment = new TextFragment();
+        startFragment(textFragment);
     }
 
     /*
@@ -330,8 +310,8 @@ public class FullscreenActivity extends AppCompatActivity {
     }
     */
 
-    public TextFragment getFragment() {
-        return fragment;
+    public TextFragment getTextFragment() {
+        return textFragment;
     }
 
     @Override
@@ -369,5 +349,11 @@ public class FullscreenActivity extends AppCompatActivity {
 
     public String getBatteryPercent() {
         return batteryPercent;
+    }
+
+    public void setOfficeView(String docPath) {
+        officeFragment = new OfficeFragment();
+        officeFragment.setFile(docPath);
+        startFragment(officeFragment);
     }
 }

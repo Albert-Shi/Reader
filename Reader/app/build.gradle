@@ -9,6 +9,8 @@ android {
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        //此处参考https://zhidao.baidu.com/question/306657885680871244.html
+        multiDexEnabled true
     }
     buildTypes {
         release {
@@ -19,7 +21,7 @@ android {
 }
 
 dependencies {
-    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation 'com.android.support:appcompat-v7:26.1.0'
     implementation 'com.android.support:design:26.1.0'
     implementation 'com.android.support.constraint:constraint-layout:1.0.2'
@@ -30,4 +32,13 @@ dependencies {
     compile 'com.android.support:appcompat-v7:+'
     compile 'com.android.support:cardview-v7:+'
     compile 'com.android.support:recyclerview-v7:+'
+    //添加Apache POI进行对Office系列格式的支持
+    //此处参考 https://www.jianshu.com/p/6cf6d06714ec
+    compile 'fr.opensagres.xdocreport:org.apache.poi.xwpf.converter.xhtml:1.0.5'
+    //添加AndroidPDFViewer
+    //此处参考 https://github.com/barteksc/AndroidPdfViewer
+    compile 'com.github.barteksc:android-pdf-viewer:3.0.0-beta.5'
+    //添加下载下来的Apache POI库    此处参考 http://blog.csdn.net/u013134722/article/details/54602510
+    compile fileTree(include: ['*.jar'], dir: 'libs')
+    implementation files('libs/poi-scratchpad-3.10.1-20140818.jar')
 }

@@ -14,6 +14,7 @@ import android.graphics.Paint;
 import android.graphics.Typeface;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -81,6 +82,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+//                notifyDataSetChanged();
                 Intent intent = new Intent(mainActivity, FullscreenActivity.class);
                 intent.putExtra("currentTextDetail", mData.get(position));
                 intent.putExtra("TextSize", mData.get(position));
@@ -91,6 +93,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         holder.itemView.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
+//                notifyDataSetChanged();
                 AlertDialog.Builder builder = new AlertDialog.Builder(mainActivity);
                 View list = LayoutInflater.from(mainActivity).inflate(R.layout.menu_display, null);
                 TextView title = (TextView) list.findViewById(R.id.menu_title_text);
@@ -131,5 +134,25 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     public void removeItem(int position) {
         mData.remove(position);
         notifyItemRemoved(position);
+        //每次移除一个Item后需要执行notifyDataSsetChanged()方法 不然RecyclerView会出现Item的position不能准确的一一对应 具体是哪一步出现了bug 暂时还没分析出来 暂且通过调用notifyDataSsetChanged()方法来解决问题吧
+        //sleep一定时间后运行notifyDataSsetChanged()方法 不直接运行而是等待一会是为了让notifyItemRemoved()方法移除动画放完
+        Thread thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    Thread.sleep(800);
+                    //返回主线程调用notifyDataSsetChanged()方法
+                    mainActivity.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            notifyDataSetChanged();
+                        }
+                    });
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+        thread.start();
     }
 }

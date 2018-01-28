@@ -5,6 +5,11 @@
 
     <group android:checkableBehavior="single">
         <item
+            android:id="@+id/nav_addFromFolder"
+            android:icon="@drawable/ic_menu_add"
+            android:title="从EBooks文件夹导入"/>
+        <!--
+        <item
             android:id="@+id/nav_camera"
             android:icon="@drawable/ic_menu_camera"
             android:title="Import" />
@@ -20,6 +25,7 @@
             android:id="@+id/nav_manage"
             android:icon="@drawable/ic_menu_manage"
             android:title="Tools" />
+        -->
     </group>
 
     <item android:title="Communicate">

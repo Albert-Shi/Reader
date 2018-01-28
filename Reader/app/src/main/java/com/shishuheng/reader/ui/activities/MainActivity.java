@@ -26,9 +26,11 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.WindowManager;
+import android.widget.Toast;
 
 import com.shishuheng.reader.R;
 import com.shishuheng.reader.datastructure.TxtDetail;
+import com.shishuheng.reader.process.Utilities;
 import com.shishuheng.reader.ui.filepicker.FilePicker;
 import com.shishuheng.reader.ui.fragment.HomeFragment;
 
@@ -169,11 +171,12 @@ public class MainActivity extends AppCompatActivity
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-        if (id == R.id.nav_camera) {
-            // Handle the camera action
-        } else if (id == R.id.nav_gallery) {
-
-        } else if (id == R.id.nav_slideshow) {
+        if (id == R.id.nav_addFromFolder) {
+            Utilities.getDirectoryBookFiles(this);
+            Toast.makeText(this, "添加完成，请手动下拉刷新书籍列表", Toast.LENGTH_SHORT).show();
+        }
+        /*
+        else if (id == R.id.nav_slideshow) {
 
         } else if (id == R.id.nav_manage) {
 
@@ -182,6 +185,7 @@ public class MainActivity extends AppCompatActivity
         } else if (id == R.id.nav_send) {
 
         }
+        */
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
