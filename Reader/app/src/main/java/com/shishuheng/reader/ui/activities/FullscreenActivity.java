@@ -34,6 +34,7 @@ import com.shishuheng.reader.process.DatabaseOperator;
 import com.shishuheng.reader.process.Utilities;
 import com.shishuheng.reader.ui.coustomize.ReadView;
 import com.shishuheng.reader.ui.fragment.OfficeFragment;
+import com.shishuheng.reader.ui.fragment.PdfFragment;
 import com.shishuheng.reader.ui.fragment.TextFragment;
 
 /**
@@ -193,6 +194,8 @@ public class FullscreenActivity extends AppCompatActivity {
             String extension = currentTxt.getName().substring(currentTxt.getName().lastIndexOf('.'));
             if (extension.equalsIgnoreCase(".txt")) {
                 setTextContent();
+            } else if (extension.equalsIgnoreCase(".pdf")) {
+                setPDFView(currentTxt);
             } else if (extension.equalsIgnoreCase(".doc") || extension.equalsIgnoreCase(".docx")) {
                 setOfficeView(currentTxt.getPath());
             }
@@ -355,5 +358,11 @@ public class FullscreenActivity extends AppCompatActivity {
         officeFragment = new OfficeFragment();
         officeFragment.setFile(docPath);
         startFragment(officeFragment);
+    }
+
+    public void setPDFView (TxtDetail detail) {
+        PdfFragment pdfFragment = new PdfFragment();
+        pdfFragment.setFile(detail);
+        startFragment(pdfFragment);
     }
 }

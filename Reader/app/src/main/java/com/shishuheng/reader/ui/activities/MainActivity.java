@@ -26,6 +26,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.WindowManager;
+import android.widget.FrameLayout;
 import android.widget.Toast;
 
 import com.shishuheng.reader.R;
@@ -49,6 +50,8 @@ public class MainActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         //全屏显示Activity（不显示状态栏）
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
+//        getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+
         getWindow().setStatusBarColor(Color.argb(0,0,0,0));
 
         setContentView(R.layout.activity_main);
@@ -124,10 +127,32 @@ public class MainActivity extends AppCompatActivity
 //            }
             */
         }
-        Context mc = this;
+
+        //展示和移除Splash
+        final FrameLayout splash = findViewById(R.id.splash_main);
+        try {
+            Thread thread = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        Thread.sleep(1000);
+                        splash.setVisibility(View.GONE);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
+            thread.start();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
         FragmentManager fm = getSupportFragmentManager();
         homeFragment = new HomeFragment();
         fm.beginTransaction().replace(R.id.content_main, homeFragment).commit();
+
+//        getWindow().addFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
+//        getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
     }
 
     @Override

@@ -43,7 +43,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     }
 
     @Override
-    public void onBindViewHolder(ViewHolder holder, final int position) {
+    public void onBindViewHolder(final ViewHolder holder, final int position) {
 //        mainActivity.currentTxt = mData.get(position);
         holder.name.setText(mData.get(position).getName());
         //设置作者
@@ -83,17 +83,20 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             @Override
             public void onClick(View v) {
 //                notifyDataSetChanged();
-                Intent intent = new Intent(mainActivity, FullscreenActivity.class);
-                intent.putExtra("currentTextDetail", mData.get(position));
-                intent.putExtra("TextSize", mData.get(position));
-                mainActivity.currentTxt = mData.get(position);
-                mainActivity.startActivity(intent);
+                if (!holder.occupy) {
+                    Intent intent = new Intent(mainActivity, FullscreenActivity.class);
+                    intent.putExtra("currentTextDetail", mData.get(position));
+                    intent.putExtra("TextSize", mData.get(position));
+                    mainActivity.currentTxt = mData.get(position);
+                    mainActivity.startActivity(intent);
+                }
             }
         });
         holder.itemView.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
 //                notifyDataSetChanged();
+                holder.occupy = true;
                 AlertDialog.Builder builder = new AlertDialog.Builder(mainActivity);
                 View list = LayoutInflater.from(mainActivity).inflate(R.layout.menu_display, null);
                 TextView title = (TextView) list.findViewById(R.id.menu_title_text);
@@ -103,6 +106,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
                 Utilities.reloadMenuItem(mainActivity, list, dialog, recyclerViewAdapter, position);
                 mainActivity.currentTxt = mData.get(position);
                 dialog.show();
+                holder.occupy = false;
                 return false;
             }
         });
@@ -123,6 +127,8 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         public final TextView name;
         public final TextView author;
         public final ImageView cover;
+        //记录是否长按 长按时禁止点击（防止长按的时候又进行了点击操作）
+        public boolean occupy = false;
         public ViewHolder(View view) {
             super(view);
             name = (TextView)view.findViewById(R.id.name_display);
