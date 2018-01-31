@@ -31,7 +31,7 @@ public class DatabaseOperator {
         db = helper.getWritableDatabase();
     }
 
-    public int getInt(String table, String field, String field_PrimaryKey, String value_PrimaryKey) {
+    public synchronized int getInt(String table, String field, String field_PrimaryKey, String value_PrimaryKey) {
         int r = -1;
         String query = "select " +field+ " from " +table+ " where " +field_PrimaryKey+ "=?";
         cursor = db.rawQuery(query, new String[] {value_PrimaryKey});
@@ -41,7 +41,7 @@ public class DatabaseOperator {
         return r;
     }
 
-    public String getString(String table, String field, String field_PrimaryKey, String value_PrimaryKey) {
+    public synchronized String getString(String table, String field, String field_PrimaryKey, String value_PrimaryKey) {
         String r = null;
         String query = "select " +field+ " from " +table+ " where " +field_PrimaryKey+ "=?";
         cursor = db.rawQuery(query, new String[] {value_PrimaryKey});
@@ -51,7 +51,7 @@ public class DatabaseOperator {
         return r;
     }
 
-    public boolean insertData(String table, ContentValues values) {
+    public synchronized boolean insertData(String table, ContentValues values) {
         try {
             db.insert(table, null, values);
             return true;
@@ -61,7 +61,7 @@ public class DatabaseOperator {
         }
     }
 
-    public boolean insertFile(File txt) {
+    public synchronized boolean insertFile(File txt) {
         try {
             ContentValues values = new ContentValues();
             values.put("path", txt.getPath());
@@ -82,7 +82,7 @@ public class DatabaseOperator {
         }
     }
 
-    public boolean updateData(String table, ContentValues values, String field_PrimaryKey, String value_PrimaryKey) {
+    public synchronized boolean updateData(String table, ContentValues values, String field_PrimaryKey, String value_PrimaryKey) {
         try {
             db.update(table, values, field_PrimaryKey + "=?", new String[]{value_PrimaryKey});
             return true;
@@ -92,7 +92,7 @@ public class DatabaseOperator {
         }
     }
 
-    public boolean deleteRecord(String table, String field_PrimaryKey, String value_PrimaryKey) {
+    public synchronized boolean deleteRecord(String table, String field_PrimaryKey, String value_PrimaryKey) {
         try {
             db.delete(table, field_PrimaryKey+"=?", new String[] {value_PrimaryKey});
             return true;
@@ -102,7 +102,7 @@ public class DatabaseOperator {
         }
     }
 
-    public boolean setTxtDetailList(List<TxtDetail> list) {
+    public synchronized boolean setTxtDetailList(List<TxtDetail> list) {
         try {
             String query = "select * from Books";
             cursor = db.rawQuery(query, null);

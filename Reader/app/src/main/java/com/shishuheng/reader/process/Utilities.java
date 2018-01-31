@@ -66,67 +66,6 @@ public class Utilities {
 
     public static void reloadHomeListView(final MainActivity activity, View view) {
 //        final ArrayList<TxtDetail> txts = Utilities.getDirectoryTXTFiles();
-        final ArrayList<TxtDetail> txts = new ArrayList<>();
-        activity.allTxts = txts;
-        //书籍信息写入数据库 此处参考 https://www.jianshu.com/p/0d8fa55d603b
-        DatabaseOperator operator = new DatabaseOperator(activity, DatabaseOperator.DATABASE_NAME, DatabaseOperator.DATABASE_VERSION);
-        ContentValues values = new ContentValues();
-
-        /*
-        try {
-            if (txts != null && txts.size() != 0) {
-                for (int i = 0; i < txts.size(); i++) {
-
-                    //String sql = "insert into Books(path, author, title, category, image, id, readPointer) values (?, ?, ?, ?, ?, ?, ?)";
-
-                    values.clear();
-                    values.put("path", txts.get(i).getPath());
-                    values.put("author", "");
-                    values.put("title", txts.get(i).getName().replace(".txt", ""));
-                    values.put("category", "");
-                    values.put("image", "");
-                    values.put("id", i);
-                    values.put("readPointer", 0);
-                    values.put("codingFormat", 1);
-                    values.put("totality", 0);
-                    operator.insertData(DatabaseOperator.TABLE_BOOKS, values);
-//                    database.insert(TABLE_BOOKS, null, values);
-//            database.execSQL(sql, new Object[] {txts.get(i).getPath(), "", txts.get(i).getName().replace(".txt", ""), "", "", i, 0});
-                }
-                */
-                //创建设置信息
-                values.clear();
-                values.put("id", 1);
-                values.put("textSize", 3);
-//                database.insert(TABLE_SETTINGS, null, values);
-                operator.insertData(DatabaseOperator.TABLE_SETTINGS, values);
-
-                //从数据库读取书籍信息
-                operator.setTxtDetailList(txts);
-
-                //关闭数据库
-//                database.close();
-                operator.close();
-
-
-                final SwipeRefreshLayout refreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.refreshLayout);
-                final RecyclerViewAdapter adapter = new RecyclerViewAdapter(activity, txts);
-                RecyclerView recyclerView = (RecyclerView) view.findViewById(R.id.display_listView);
-                recyclerView.setLayoutAnimation(AnimationUtils.loadLayoutAnimation(activity, R.anim.layout_animation_from_bottom));
-                recyclerView.setLayoutManager(new LinearLayoutManager(activity, LinearLayoutManager.VERTICAL, false));
-                recyclerView.setAdapter(adapter);
-                refreshLayout.setColorSchemeColors(Color.argb(255, 214, 69, 69));
-                refreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-                    @Override
-                    public void onRefresh() {
-                        DatabaseOperator dbo = new DatabaseOperator(activity, DatabaseOperator.DATABASE_NAME, DatabaseOperator.DATABASE_VERSION);
-                        dbo.setTxtDetailList(txts);
-                        dbo.close();
-                        adapter.notifyDataSetChanged();
-                        refreshLayout.setRefreshing(false);
-                        Toast.makeText(activity, "数据已更新", Toast.LENGTH_SHORT).show();
-                    }
-                });
 
 
         /*

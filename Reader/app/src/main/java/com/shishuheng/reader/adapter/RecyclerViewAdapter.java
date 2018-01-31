@@ -18,6 +18,8 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -28,6 +30,7 @@ import com.shishuheng.reader.ui.activities.MainActivity;
 import com.shishuheng.reader.ui.activities.FullscreenActivity;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * Created by shishuheng on 2018/1/14.
@@ -37,14 +40,22 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     private ArrayList<TxtDetail> mData;
     private MainActivity mainActivity;
     private RecyclerViewAdapter recyclerViewAdapter = this;
-    public RecyclerViewAdapter(Activity activity, ArrayList<TxtDetail> list) {
+    public boolean showCheckBox = false;
+    private HashMap<Integer, Boolean> selectedHashMap;
+    private int selectedAll = 0;
+
+    public RecyclerViewAdapter(Activity activity, ArrayList<TxtDetail> list, HashMap<Integer, Boolean> selectedHashMap) {
         mainActivity = (MainActivity) activity;
         mData = list;
+        this.selectedHashMap =selectedHashMap;
     }
 
     @Override
     public void onBindViewHolder(final ViewHolder holder, final int position) {
 //        mainActivity.currentTxt = mData.get(position);
+        Log.v("当前selectAll为", ""+selectedAll);
+        Log.v("当前position= "+position, "selectedHashMap.get("+position+")= "+selectedHashMap.get(position));
+
         holder.name.setText(mData.get(position).getName());
         //设置作者
         //设置图片
@@ -78,6 +89,10 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             }
         }
         //*/
+        if (selectedHashMap.get(position) == null || selectedHashMap.get(position) == false)
+            holder.checkBox.setChecked(false);
+        else
+            holder.checkBox.setChecked(true);
         holder.cover.setImageBitmap(bitmap);
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -110,6 +125,35 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
                 return false;
             }
         });
+        if (showCheckBox) {
+            holder.checkBox.setVisibility(View.VISIBLE);
+        } else {
+            holder.checkBox.setVisibility(View.GONE);
+        }
+
+        holder.checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked) {
+                    selectedHashMap.put(position, true);
+                    Log.v("已经将selectAll手动切换为", ""+selectedAll);
+                    Log.v("当前position= "+position, "selectedHashMap.get("+position+")= "+selectedHashMap.get(position));
+
+                } else {
+                    selectedAll = 0;
+                    Log.v("已经将selectAll手动切换为", ""+selectedAll);
+                    selectedHashMap.put(position, false);
+                    Log.v("当前position= "+position, "selectedHashMap.get("+position+")= "+selectedHashMap.get(position));
+                }
+            }
+        });
+
+        if (selectedAll == 1) {
+            holder.checkBox.setChecked(true);
+            selectedHashMap.put(position, true);
+        } else if (selectedAll == -1) {
+            holder.checkBox.setChecked(false);
+        }
     }
 
     @Override
@@ -124,6 +168,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
+        public final CheckBox checkBox;
         public final TextView name;
         public final TextView author;
         public final ImageView cover;
@@ -134,6 +179,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             name = (TextView)view.findViewById(R.id.name_display);
             author = (TextView)view.findViewById(R.id.author_display);
             cover = (ImageView)view.findViewById(R.id.cover_display_list);
+            checkBox = view.findViewById(R.id.checkbox_display_list);
         }
     }
 
@@ -160,5 +206,17 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             }
         });
         thread.start();
+    }
+
+    public void setSelectedAll() {
+        selectedAll = 1;
+        for (int i = 0; i < mData.size(); i++) {
+            selectedHashMap.put(i, true);
+        }
+    }
+
+    public void setCancelSelected() {
+        selectedAll = -1;
+        selectedHashMap.clear();
     }
 }

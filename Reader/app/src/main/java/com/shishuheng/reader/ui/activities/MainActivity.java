@@ -4,6 +4,7 @@ import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Environment;
 import android.support.v4.app.Fragment;
 import android.content.Context;
@@ -16,6 +17,7 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -25,8 +27,12 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.widget.Button;
 import android.widget.FrameLayout;
+import android.widget.PopupMenu;
+import android.widget.PopupWindow;
 import android.widget.Toast;
 
 import com.shishuheng.reader.R;
@@ -44,6 +50,12 @@ public class MainActivity extends AppCompatActivity
     public Fragment currentFragment = null;
     private HomeFragment homeFragment = null;
     private MainActivity activity = this;
+
+    //悬浮按钮相关控件
+    private PopupWindow popupWindow;
+    private Button addButton_popupWindow;
+    private Button editButton_popupWindow;
+    private View addButtonView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,7 +76,7 @@ public class MainActivity extends AppCompatActivity
         toolbar.setTitle("主页");
         toolbar.setSubtitle("书籍列表");
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        final FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -72,8 +84,14 @@ public class MainActivity extends AppCompatActivity
                 Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
                         */
-                FilePicker filePicker = new FilePicker(activity, Environment.getExternalStorageDirectory().getAbsolutePath());
-                filePicker.create().show();
+                /*
+                */
+
+                if (popupWindow.isShowing()) {
+                    popupWindow.dismiss();
+                } else {
+                    popupWindow.showAsDropDown(fab, -50, -500);
+                }
             }
         });
 
@@ -128,6 +146,26 @@ public class MainActivity extends AppCompatActivity
             */
         }
 
+        //设置悬浮按钮 PopupWindow参考 https://www.jianshu.com/p/825d1cc9fa79
+        addButtonView = LayoutInflater.from(activity).inflate(R.layout.addbutton_pop, null, false);
+        popupWindow = new PopupWindow(activity);
+        popupWindow.setWidth(ViewGroup.LayoutParams.WRAP_CONTENT);
+        popupWindow.setHeight(ViewGroup.LayoutParams.WRAP_CONTENT);
+        popupWindow.setContentView(addButtonView);
+        popupWindow.setOutsideTouchable(false);
+        popupWindow.setBackgroundDrawable(new ColorDrawable(0xffffff));
+        addButton_popupWindow = addButtonView.findViewById(R.id.add_addButton);
+        addButton_popupWindow.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                FilePicker filePicker = new FilePicker(activity, Environment.getExternalStorageDirectory().getAbsolutePath());
+                filePicker.create().show();
+                popupWindow.dismiss();
+            }
+        });
+        editButton_popupWindow = activity.findViewById(R.id.edit_addButton);
+
+
         //展示和移除Splash
         final FrameLayout splash = findViewById(R.id.splash_main);
         try {
@@ -151,6 +189,11 @@ public class MainActivity extends AppCompatActivity
         homeFragment = new HomeFragment();
         fm.beginTransaction().replace(R.id.content_main, homeFragment).commit();
 
+        if (splash != null) {
+            splash.setVisibility(View.GONE);
+        }
+
+
 //        getWindow().addFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
 //        getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
     }
@@ -163,6 +206,8 @@ public class MainActivity extends AppCompatActivity
         } else if (currentFragment != homeFragment && currentFragment != null) {
             getSupportFragmentManager().beginTransaction().replace(R.id.content_main, homeFragment).commit();
             currentFragment = homeFragment;
+        } else if (popupWindow != null && popupWindow.isShowing()) {
+            popupWindow.dismiss();
         } else {
             super.onBackPressed();
         }
@@ -215,5 +260,17 @@ public class MainActivity extends AppCompatActivity
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    public Button getEditButton_popupWindow() {
+        return editButton_popupWindow;
+    }
+
+    public PopupWindow getPopupWindow() {
+        return popupWindow;
+    }
+
+    public View getAddButtonView() {
+        return addButtonView;
     }
 }
