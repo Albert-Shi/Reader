@@ -40,9 +40,13 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     private ArrayList<TxtDetail> mData;
     private MainActivity mainActivity;
     private RecyclerViewAdapter recyclerViewAdapter = this;
-    public boolean showCheckBox = false;
+//    public boolean showCheckBox = false;
+    //记录已选择的项 记录其position和是(true)否(false)已经选择
     private HashMap<Integer, Boolean> selectedHashMap;
+    //是否选择全部 -1:取消所有选择 0:默认 1:全选
     private int selectedAll = 0;
+    //进入选择模式（编辑模式）
+    private boolean selectMode = false;
 
     public RecyclerViewAdapter(Activity activity, ArrayList<TxtDetail> list, HashMap<Integer, Boolean> selectedHashMap) {
         mainActivity = (MainActivity) activity;
@@ -52,9 +56,10 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
 
     @Override
     public void onBindViewHolder(final ViewHolder holder, final int position) {
+        holder.checkBox.setTag(position);
 //        mainActivity.currentTxt = mData.get(position);
-        Log.v("当前selectAll为", ""+selectedAll);
-        Log.v("当前position= "+position, "selectedHashMap.get("+position+")= "+selectedHashMap.get(position));
+//        Log.v("当前selectAll为", ""+selectedAll);
+//        Log.v("当前position= "+position, "selectedHashMap.get("+position+")= "+selectedHashMap.get(position));
 
         holder.name.setText(mData.get(position).getName());
         //设置作者
@@ -89,21 +94,25 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             }
         }
         //*/
-        if (selectedHashMap.get(position) == null || selectedHashMap.get(position) == false)
-            holder.checkBox.setChecked(false);
-        else
-            holder.checkBox.setChecked(true);
+
         holder.cover.setImageBitmap(bitmap);
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 //                notifyDataSetChanged();
-                if (!holder.occupy) {
-                    Intent intent = new Intent(mainActivity, FullscreenActivity.class);
-                    intent.putExtra("currentTextDetail", mData.get(position));
-                    intent.putExtra("TextSize", mData.get(position));
-                    mainActivity.currentTxt = mData.get(position);
-                    mainActivity.startActivity(intent);
+                if (selectMode) {
+                    if (holder.checkBox.isChecked())
+                        holder.checkBox.setChecked(false);
+                    else
+                        holder.checkBox.setChecked(true);
+                } else {
+                    if (!holder.occupy) {
+                        Intent intent = new Intent(mainActivity, FullscreenActivity.class);
+                        intent.putExtra("currentTextDetail", mData.get(position));
+                        intent.putExtra("TextSize", mData.get(position));
+                        mainActivity.currentTxt = mData.get(position);
+                        mainActivity.startActivity(intent);
+                    }
                 }
             }
         });
@@ -111,21 +120,23 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             @Override
             public boolean onLongClick(View v) {
 //                notifyDataSetChanged();
-                holder.occupy = true;
-                AlertDialog.Builder builder = new AlertDialog.Builder(mainActivity);
-                View list = LayoutInflater.from(mainActivity).inflate(R.layout.menu_display, null);
-                TextView title = (TextView) list.findViewById(R.id.menu_title_text);
-                title.setText(mData.get(position).getName());
-                builder.setView(list);
-                AlertDialog dialog = builder.create();
-                Utilities.reloadMenuItem(mainActivity, list, dialog, recyclerViewAdapter, position);
-                mainActivity.currentTxt = mData.get(position);
-                dialog.show();
-                holder.occupy = false;
+                if (!selectMode) {
+                    holder.occupy = true;
+                    AlertDialog.Builder builder = new AlertDialog.Builder(mainActivity);
+                    View list = LayoutInflater.from(mainActivity).inflate(R.layout.menu_display, null);
+                    TextView title = (TextView) list.findViewById(R.id.menu_title_text);
+                    title.setText(mData.get(position).getName());
+                    builder.setView(list);
+                    AlertDialog dialog = builder.create();
+                    Utilities.reloadMenuItem(mainActivity, list, dialog, recyclerViewAdapter, position);
+                    mainActivity.currentTxt = mData.get(position);
+                    dialog.show();
+                    holder.occupy = false;
+                }
                 return false;
             }
         });
-        if (showCheckBox) {
+        if (selectMode) {
             holder.checkBox.setVisibility(View.VISIBLE);
         } else {
             holder.checkBox.setVisibility(View.GONE);
@@ -134,16 +145,17 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         holder.checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                int pos = (int)holder.checkBox.getTag();
                 if (isChecked) {
-                    selectedHashMap.put(position, true);
-                    Log.v("已经将selectAll手动切换为", ""+selectedAll);
-                    Log.v("当前position= "+position, "selectedHashMap.get("+position+")= "+selectedHashMap.get(position));
+                    selectedHashMap.put(pos, true);
+//                    Log.v("已经将selectAll手动切换为", ""+selectedAll);
+//                    Log.v("当前position= "+pos, "selectedHashMap.get("+pos+")= "+selectedHashMap.get(pos));
 
                 } else {
                     selectedAll = 0;
-                    Log.v("已经将selectAll手动切换为", ""+selectedAll);
-                    selectedHashMap.put(position, false);
-                    Log.v("当前position= "+position, "selectedHashMap.get("+position+")= "+selectedHashMap.get(position));
+//                    Log.v("已经将selectAll手动切换为", ""+selectedAll);
+                    selectedHashMap.remove(pos);
+//                    Log.v("当前position= "+pos, "selectedHashMap.get("+pos+")= "+selectedHashMap.get(pos));
                 }
             }
         });
@@ -154,6 +166,11 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         } else if (selectedAll == -1) {
             holder.checkBox.setChecked(false);
         }
+
+        if (selectedHashMap.get(holder.checkBox.getTag()) == null || selectedHashMap.get(holder.checkBox.getTag()) == null) {
+            holder.checkBox.setChecked(false);
+        } else
+            holder.checkBox.setChecked(selectedHashMap.get(holder.checkBox.getTag()));
     }
 
     @Override
@@ -218,5 +235,17 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     public void setCancelSelected() {
         selectedAll = -1;
         selectedHashMap.clear();
+    }
+
+    public void setSelectMode() {
+        selectMode = true;
+    }
+
+    public void cancelSelectMode() {
+        selectMode = false;
+    }
+
+    public boolean isSelectMode() {
+        return selectMode;
     }
 }

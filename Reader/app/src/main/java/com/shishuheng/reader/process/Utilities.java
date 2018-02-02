@@ -126,9 +126,9 @@ public class Utilities {
                 String info = "详细位置:"+file.getAbsolutePath() +"\n\n"+ "文件大小:"+getFileSize(file.length());
                 builder.setMessage(info);
                 switch (position) {
-                    case 0: Utilities.deleteFileInDatabase(mainActivity, file.getAbsolutePath()); recyclerViewAdapter.removeItem(itemPosition); Log.v("外部: ", itemPosition+""); alertDialog.dismiss();
-                    case 1: Utilities.deleteFile(mainActivity, file); recyclerViewAdapter.removeItem(itemPosition); alertDialog.dismiss();
-                    case 2: builder.create().show(); alertDialog.dismiss();
+                    case 0: Utilities.deleteFileInDatabase(mainActivity, file.getAbsolutePath()); recyclerViewAdapter.removeItem(itemPosition); Log.v("外部: ", itemPosition+""); alertDialog.dismiss();break;
+                    case 1: Utilities.deleteFile(mainActivity, file); recyclerViewAdapter.removeItem(itemPosition); alertDialog.dismiss();break;
+                    case 2: builder.create().show(); alertDialog.dismiss();break;
                     default: break;
                 }
             }

@@ -5,6 +5,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
+import android.util.Log;
 
 import com.shishuheng.reader.datastructure.TxtDetail;
 
@@ -92,11 +93,12 @@ public class DatabaseOperator {
         }
     }
 
-    public synchronized boolean deleteRecord(String table, String field_PrimaryKey, String value_PrimaryKey) {
+    public boolean deleteRecord(String table, String field_PrimaryKey, String value_PrimaryKey) {
         try {
             db.delete(table, field_PrimaryKey+"=?", new String[] {value_PrimaryKey});
             return true;
         } catch (SQLException sql) {
+            Log.v("注意","SQLException");
             sql.printStackTrace();
             return false;
         }
